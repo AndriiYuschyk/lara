@@ -1,0 +1,68 @@
+services:
+  app:
+    build:
+      context: ./laravel-app
+      dockerfile: Dockerfile
+    container_name: laravel_app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./laravel-app:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - laravel
+    depends_on:
+      - db
+
+  nginx:
+    image: nginx:alpine
+    container_name: laravel_nginx
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - ./laravel-app:/var/www
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+    networks:
+      - laravel
+    depends_on:
+      - app
+
+  db:
+    image: mariadb:11.2
+    container_name: laravel_mariadb
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: laravel_db
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_USER: laravel_user
+      MYSQL_PASSWORD: laravel_password
+    volumes:
+      - db-data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - laravel
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: laravel_phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: root_password
+    ports:
+      - "8080:80"
+    networks:
+      - laravel
+    depends_on:
+      - db
+
+networks:
+  laravel:
+    driver: bridge
+
+volumes:
+  db-data:
+    driver: local
