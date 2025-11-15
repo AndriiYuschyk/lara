@@ -1,27 +1,38 @@
 services:
+  setup:
+    image: composer:2
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: sh -c "composer install --no-dev && cp .env.example .env"
+    restart: "no"
+
   app:
     build:
-      context: ./laravel-app
       dockerfile: Dockerfile
     container_name: laravel_app
     restart: unless-stopped
     working_dir: /var/www
     volumes:
-      - ./laravel-app:/var/www
+      - .:/var/www
       - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    user: "${UID}:${GID}"
     networks:
       - laravel
     depends_on:
-      - db
+      db:
+        condition: service_started
+      setup:
+        condition: service_completed_successfully
 
   nginx:
     image: nginx:alpine
     container_name: laravel_nginx
     restart: unless-stopped
     ports:
-      - "8000:80"
+      - "8080:80"
     volumes:
-      - ./laravel-app:/var/www
+      - .:/var/www
       - ./docker/nginx/conf.d:/etc/nginx/conf.d
     networks:
       - laravel
@@ -53,7 +64,7 @@ services:
       PMA_PORT: 3306
       MYSQL_ROOT_PASSWORD: root_password
     ports:
-      - "8080:80"
+      - "8081:80"
     networks:
       - laravel
     depends_on:

@@ -1,0 +1,27 @@
+/node_modules
+/public/build
+/public/hot
+/vendor
+
+.env
+.env.*
+.env.production
+
+# Laravel storage
+/storage/*.key
+/storage/app/public
+/storage/framework/*
+/storage/logs/*
+
+# Bootstrap cache
+/bootstrap/cache/*.php
+
+# IDE
+/.idea
+/.vscode
+/.fleet
+/.zed
+
+# OS
+.DS_Store
+Thumbs.db
