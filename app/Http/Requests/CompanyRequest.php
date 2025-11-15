@@ -6,16 +6,13 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class CompanyRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Правила валідації запиту.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
@@ -29,7 +26,7 @@ class CompanyRequest extends FormRequest
     }
 
     /**
-     * Get custom error messages for validator errors.
+     * Кастомні повідомлення про помилки валідації.
      *
      * @return array<string, string>
      */
@@ -45,5 +42,33 @@ class CompanyRequest extends FormRequest
             'address.required' => 'Адреса є обов\'язковою',
             'address.string' => 'Адреса має бути рядком',
         ];
+    }
+
+    /**
+     * Нормалізуємо значення перед валідацією.
+     */
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'edrpou' => $this->normalizeEdrpou($this->input('edrpou', '')),
+            'name' => $this->normalizeString($this->input('name', '')),
+            'address' => $this->normalizeString($this->input('address', '')),
+        ]);
+    }
+
+    /*
+     * Видаляємо всі нецифрові символи з ЄДРПОУ.
+     */
+    private function normalizeEdrpou(string $edrpou): string
+    {
+        return preg_replace('/\D/', '', $edrpou);
+    }
+
+    /*
+     * Обрізаємо пробіли на початку та в кінці, а також замінюємо послідовності пробілів одним пробілом.
+     */
+    private function normalizeString(string $value): string
+    {
+        return preg_replace('/\s+/', ' ', trim($value));
     }
 }

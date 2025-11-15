@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HandleVersionsTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -9,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Company extends Model
 {
     use HasFactory;
+    use HandleVersionsTrait;
 
     protected $fillable = [
         'name',
@@ -21,14 +23,13 @@ class Company extends Model
         return $this->hasMany(CompanyVersion::class);
     }
 
-    public function latestVersion(): ?CompanyVersion
+    public function getVersionableAttributes(): array
     {
-        return $this->versions()->orderBy('version', 'desc')->first();
+        return ['name', 'address'];
     }
 
-    public function getNextVersionNumber(): int
+    public function getVersionModel(): string
     {
-        $latestVersion = $this->versions()->max('version');
-        return $latestVersion ? $latestVersion + 1 : 1;
+        return CompanyVersion::class;
     }
 }

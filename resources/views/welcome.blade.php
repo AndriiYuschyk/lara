@@ -41,7 +41,7 @@
                     </li>
                     <li class="flex items-start">
                         <span class="material-icons text-green-500 mr-2 mt-0.5">blur_on</span>
-                        <span>Перегляд всії версій компанії за її ЄДРПОУ</span>
+                        <span>Перегляд всіх версій змін даних компанії за її ЄДРПОУ</span>
                     </li>
                     <li class="flex items-start">
                         <span class="material-icons text-green-500 mr-2 mt-0.5">blur_on</span>

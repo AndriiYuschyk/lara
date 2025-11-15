@@ -17,7 +17,7 @@ class CompanyVersion extends Model
         'address',
     ];
 
-    public function companies(): BelongsTo
+    public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }

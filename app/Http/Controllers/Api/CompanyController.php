@@ -267,51 +267,30 @@ class CompanyController extends Controller
      */
     public function store(CompanyRequest $request): JsonResponse
     {
-        $validatedData = $request->validated();
+        $payload = $request->validated();
 
-        $company = Company::where('edrpou', trim($validatedData['edrpou']))->first();
+        $company = Company::where('edrpou', trim($payload['edrpou']))->first();
 
         if (!$company) {
-            $company = Company::create($validatedData);
-
-            $companyVersion = $company->versions()->create([
-                'company_id' => $company->id,
-                'version' => $company->getNextVersionNumber(),
-                'name' => $validatedData['name'],
-                'address' => $validatedData['address'],
-            ]);
+            $company = Company::create($payload);
 
             return response()->json([
                 'status' => CategoryVersionStatus::CREATED->value,
                 'company_id' => $company->id,
-                'version' => $companyVersion->version,
+                'version' => 1,
             ], 201);
         }
 
-        $hasChanges = $company->name !== $validatedData['name']
-            || $company->address !== $validatedData['address'];
+        $company->update($payload);
 
-        if ($hasChanges) {
-            $company->update($validatedData);
+        $latestVersion = $company->latestVersion();
+        $wasUpdated = $company->wasChanged(['name', 'address']);
 
-            $companyVersion = $company->versions()->create([
-                'company_id' => $company->id,
-                'version' => $company->getNextVersionNumber(),
-                'name' => $validatedData['name'],
-                'address' => $validatedData['address'],
-            ]);
-
-            return response()->json([
-                'status' => CategoryVersionStatus::UPDATED->value,
-                'company_id' => $company->id,
-                'version' => $companyVersion->version,
-            ], 200);
-        }
 
         return response()->json([
-            'status' => CategoryVersionStatus::DUPLICATE->value,
+            'status' => $wasUpdated ? CategoryVersionStatus::UPDATED->value : CategoryVersionStatus::DUPLICATE->value,
             'company_id' => $company->id,
-            'version' => $company->latestVersion()->version,
+            'version' => $latestVersion ? $latestVersion->version : 1,
         ], 200);
     }
 }
