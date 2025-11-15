@@ -25,3 +25,6 @@
 # OS
 .DS_Store
 Thumbs.db
+
+# Swagger API docs
+/storage/api-docs/

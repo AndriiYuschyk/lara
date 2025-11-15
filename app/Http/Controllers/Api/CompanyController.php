@@ -28,6 +28,77 @@ use OpenApi\Annotations as OA;
  */
 class CompanyController extends Controller
 {
+
+    /**
+     * @OA\Get(
+     *     path="/api/company/{edrpou}/versions",
+     *     summary="Отримати всі версії компанії за її ЄДРПОУ",
+     *     description="Повертає історію всіх змін компанії за її ЄДРПОУ",
+     *     operationId="getCompanyVersions",
+     *     tags={"Companies"},
+     *     @OA\Parameter(
+     *         name="edrpou",
+     *         in="path",
+     *         required=true,
+     *         description="ЄДРПОУ компанії",
+     *         @OA\Schema(type="string", example="37027819")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Список версій компанії",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="versions",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="company_id", type="integer", example=1),
+     *                     @OA\Property(property="version", type="integer", example=2),
+     *                     @OA\Property(property="name", type="string", example="ТОВ Українська енергетична біржа"),
+     *                     @OA\Property(property="edrpou", type="string", example="37027819"),
+     *                     @OA\Property(property="address", type="string", example="01001, Україна, м. Київ, вул. Хрещатик, 44"),
+     *                     @OA\Property(property="created_at", type="string", example="14.11.2025 18:30:45")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Компанію не знайдено",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Компанію не знайдено")
+     *         )
+     *     )
+     * )
+     */
+    public function indexVersions(string $edrpou)
+    {
+        $company = Company::where('edrpou', $edrpou)->first();
+
+        if (!$company) {
+            return response()->json([
+                'message' => 'Компанію не знайдено',
+            ], 404);
+        }
+
+        $versions = $company->versions()
+            ->orderBy('version', 'desc')
+            ->get()
+            ->map(function ($version) use ($company) {
+                return [
+                    'company_id' => $version->company_id,
+                    'version' => $version->version,
+                    'name' => $version->name,
+                    'edrpou' => $company->edrpou,
+                    'address' => $version->address,
+                    'created_at' => \Carbon\Carbon::parse($version->created_at)->format('d.m.Y H:i:s'),
+                ];
+            });
+
+        return response()->json([
+            'versions' => $versions,
+        ], 200);
+    }
+
     /**
      * @OA\Post(
      *     path="/api/company",
