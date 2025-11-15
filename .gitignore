@@ -28,3 +28,6 @@ Thumbs.db
 
 # Swagger API docs
 /storage/api-docs/
+
+# PHPUnit
+.phpunit.result.cache

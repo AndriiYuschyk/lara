@@ -37,15 +37,15 @@
                 <ul class="space-y-3 text-gray-600">
                     <li class="flex items-start">
                         <span class="material-icons text-green-500 mr-2 mt-0.5">blur_on</span>
-                        <span>Створення/Оновлення компанії з підтримкою версійності змін</span>
+                        <span>Створення/Оновлення компанії з підтримкою версійності змін за роутом <b>api/company</b></span>
                     </li>
                     <li class="flex items-start">
                         <span class="material-icons text-green-500 mr-2 mt-0.5">blur_on</span>
-                        <span>Перегляд всіх версій змін даних компанії за її ЄДРПОУ</span>
+                        <span>Перегляд всіх версій змін даних компанії за її ЄДРПОУ за роутом <b>api/company/{edrpou}/versions</b></span>
                     </li>
                     <li class="flex items-start">
                         <span class="material-icons text-green-500 mr-2 mt-0.5">blur_on</span>
-                        <span>Перегляд список усіх компаній збережених в системі</span>
+                        <span>Перегляд список усіх компаній збережених в системі за роутом <b>api/companies</b></span>
                     </li>
                     <li class="flex items-start">
                         <span class="material-icons text-green-500 mr-2 mt-0.5">blur_on</span>
@@ -54,6 +54,10 @@
                     <li class="flex items-start">
                         <span class="material-icons text-green-500 mr-2 mt-0.5">blur_on</span>
                         <span>Створено <i>CompanySeeder</i> для наповнення списку компаній</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="material-icons text-green-500 mr-2 mt-0.5">blur_on</span>
+                        <span>Створено <i>CompanyControllerTest</i> для тестування роботи функціоналу</span>
                     </li>
                 </ul>
             </div>

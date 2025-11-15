@@ -50,25 +50,9 @@ class CompanyRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
-            'edrpou' => $this->normalizeEdrpou($this->input('edrpou', '')),
-            'name' => $this->normalizeString($this->input('name', '')),
-            'address' => $this->normalizeString($this->input('address', '')),
+            'edrpou' => preg_replace('/\D/', '', $this->input('edrpou', '')),
+            'name' => preg_replace('/\s+/', ' ', trim($this->input('name', ''))),
+            'address' => preg_replace('/\s+/', ' ', trim($this->input('address', ''))),
         ]);
-    }
-
-    /*
-     * Видаляємо всі нецифрові символи з ЄДРПОУ.
-     */
-    private function normalizeEdrpou(string $edrpou): string
-    {
-        return preg_replace('/\D/', '', $edrpou);
-    }
-
-    /*
-     * Обрізаємо пробіли на початку та в кінці, а також замінюємо послідовності пробілів одним пробілом.
-     */
-    private function normalizeString(string $value): string
-    {
-        return preg_replace('/\s+/', ' ', trim($value));
     }
 }
