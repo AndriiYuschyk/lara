@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Enums\CategoryVersionStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CompanyRequest;
+use App\Http\Resources\CompanyCollection;
+use App\Http\Resources\CompanyVersionResource;
+use App\Http\Resources\CompanyWithKvedsResource;
 use App\Models\Company;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -88,33 +91,19 @@ class CompanyController extends Controller
 
         $companies = Company::withCount('versions')
             ->orderBy('created_at', 'desc')
-            ->limit($limit)
             ->offset($offset)
+            ->limit($limit)
             ->get();
 
-        $data = $companies->map(function ($company) {
-            return [
-                'company_id' => $company->id,
-                'name' => $company->name,
-                'edrpou' => $company->edrpou,
-                'address' => $company->address,
-                'versions_count' => $company->versions_count,
-                'created_at' => \Carbon\Carbon::parse($company->created_at)->format('d.m.Y H:i:s'),
-            ];
-        });
+        $collection = new \Illuminate\Pagination\LengthAwarePaginator(
+            $companies,
+            $totalCount,
+            $limit,
+            ($offset / $limit) + 1,
+            ['path' => $request->url()]
+        );
 
-        $pageNumber = $offset > 0 ? (int) floor($offset / $limit) + 1 : 1;
-        $totalPages = $limit > 0 ? (int) ceil($totalCount / $limit) : 0;
-
-        return response()->json([
-            'data' => $data,
-            'meta' => [
-                'page_number' => $pageNumber,
-                'page_size' => $limit,
-                'total_count' => $totalCount,
-                'total_pages' => $totalPages,
-            ],
-        ], 200);
+        return response()->json(new CompanyCollection($collection), 200);
     }
 
     /**
@@ -168,19 +157,7 @@ class CompanyController extends Controller
             ], 404);
         }
 
-        $versions = $company->versions()
-            ->orderBy('version', 'desc')
-            ->get()
-            ->map(function ($version) use ($company) {
-                return [
-                    'company_id' => $version->company_id,
-                    'version' => $version->version,
-                    'name' => $version->name,
-                    'edrpou' => $company->edrpou,
-                    'address' => $version->address,
-                    'created_at' => \Carbon\Carbon::parse($version->created_at)->format('d.m.Y H:i:s'),
-                ];
-            });
+        $versions = CompanyVersionResource::collection($company->versions);
 
         return response()->json([
             'versions' => $versions,
@@ -378,34 +355,17 @@ class CompanyController extends Controller
             ->offset($offset)
             ->get();
 
-        $data = $companies->map(function ($company) {
-            return [
-                'company_id' => $company->id,
-                'name' => $company->name,
-                'edrpou' => $company->edrpou,
-                'address' => $company->address,
-                'versions_count' => $company->versions_count,
-                'kveds' => $company->kveds->map(function ($kved) {
-                    return [
-                        'code' => $kved->code,
-                        'name' => $kved->name,
-                        'is_primary' => (bool) $kved->pivot->is_primary,
-                    ];
-                }),
-                'created_at' => \Carbon\Carbon::parse($company->created_at)->format('d.m.Y H:i:s'),
-            ];
-        });
-
-        $pageNumber = $offset > 0 ? (int) floor($offset / $limit) + 1 : 1;
-        $totalPages = $limit > 0 ? (int) ceil($totalCount / $limit) : 0;
+        $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
+            $companies, $totalCount, $limit, ($offset / $limit) + 1, ['path' => $request->url()]
+        );
 
         return response()->json([
-            'data' => $data,
+            'data' => CompanyWithKvedsResource::collection($paginator->getCollection()),
             'meta' => [
-                'page_number' => $pageNumber,
-                'page_size' => $limit,
-                'total_count' => $totalCount,
-                'total_pages' => $totalPages,
+                'page_number' => $paginator->currentPage(),
+                'page_size' => $paginator->perPage(),
+                'total_count' => $paginator->total(),
+                'total_pages' => $paginator->lastPage(),
             ],
         ], 200);
     }
