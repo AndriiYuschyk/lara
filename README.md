@@ -35,8 +35,7 @@
 ## Інструкція по розгортанню проєкту за допомогою Docker
 1. Клонування репозиторію
 ```angular2html
-git clone https://github.com/AndriiYuschyk/laravel-app.git
-
+git clone [repository_url]
 ```
 2. Запустити скрипт для розгортання Docker-контейнерів (формування env-файлу, збірка образів, запуск контейнерів, встановлення composer, міграції бази даних, наповнення початковими даними):
 ```angular2html
