@@ -23,4 +23,5 @@ until [ "$(docker inspect -f '{{.State.Running}}' laravel_mariadb)" = "true" ]; 
 done
 
 # Виконуємо міграції та наповнюємо базу даних початковими даними
+sleep 1
 docker exec -it laravel_app php artisan migrate:fresh --seed
